@@ -1,5 +1,10 @@
 import numpy as np
 import csv
+import pandas as pd
+import matplotlib.pyplot as plt
+import sys
+import random
+import asyncio
 
 skip_line_upto=17 
 general_information={
@@ -8,9 +13,9 @@ general_information={
 }
 
 source_files= [
-    {"source_file": r'source_file.NS','output_file': r'output_file.NS',type:'NS', 'max_vel': 0.004100},
-    {"source_file": r'source_file.UD','output_file': r'output_file.UD', type:'UD','max_vel': 0.005042},
-    {"source_file": r'source_file.EW','output_file': r'output_file.EW',type:'EW', 'max_vel': 0.003635},
+    {"source_file": r'source_file.NS','output_file': r'output_file.NS',type:'NS'},
+    {"source_file": r'source_file.UD','output_file': r'output_file.UD', type:'UD'},
+    {"source_file": r'source_file.EW','output_file': r'output_file.EW',type:'EW'},
 ]
 
 
@@ -77,5 +82,31 @@ for index,file_info in enumerate(source_files):
 generate_csv_file('final_result.csv', time_array, list(map(lambda x: list(x), velocity_lists.values())),['Time'] + list(velocity_lists.keys()))
 
 
-# def write_file():
-#     return generate_csv_file(output_csv_file_path, time_array, velocities)
+def generate_fft(data,key,label="Gorkha",color='r'):
+    t1=data[:, 0]
+    acc1=data[:,1]
+    dt1=0.01
+    n1 = len(acc1)
+    freq1 = np.fft.fftfreq(n1, d=dt1)
+    accfft1 = np.array(np.fft.fft(acc1, axis=0))
+    Accfft1=np.abs(accfft1)*dt1
+    plt.figure()
+    plt.loglog(freq1, Accfft1, label=label, lw=0.3, color=color)
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('Amplitude (cm/s²)')
+    plt.grid()
+    plt.title(f"Amplitude vs Frequency - {key}")
+    plt.legend()
+
+    # Save the figure before showing it
+    plt.savefig(f'{key}.png')
+    plt.show()
+
+
+for key in velocity_lists.keys():
+    data = pd.read_csv('final_result.csv',header=1,usecols=['Time',key]).values
+    generate_fft(data,label=f"{general_information['station']}_{key}",key=key,color=['r','g','b'][random.randint(0,2)])
+
+
+
+

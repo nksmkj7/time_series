@@ -2,10 +2,12 @@ import numpy as np
 import csv
 import pandas as pd
 
+
+station = 'ST01'
 source_files= [
-    {"source_file": r'source_file.NS','output_file': r'output_file.NS',type:'NS'},
-    {"source_file": r'source_file.UD','output_file': r'output_file.UD', type:'UD'},
-    {"source_file": r'source_file.EW','output_file': r'output_file.EW',type:'EW'},
+    {"source_file": r'source_file.NS','output_file': r'output_file.NS',type:'NS', 'max_vel': 0.004100},
+    {"source_file": r'source_file.UD','output_file': r'output_file.UD', type:'UD','max_vel': 0.005042},
+    {"source_file": r'source_file.EW','output_file': r'output_file.EW',type:'EW', 'max_vel': 0.003635},
 ]
 
 
@@ -35,6 +37,7 @@ def generate_csv_file(output_csv_file_path, time_array, velocities,row_data = ['
     zip_data=zip(time_array,*velocities)
     with open(output_csv_file_path, mode='w', newline='') as file:
         csv_writer = csv.writer(file)
+        csv_writer.writerow([station])
         csv_writer.writerow(row_data)  # Write header
         for t, *v in zip_data:
             row = [t]
@@ -44,9 +47,9 @@ def generate_csv_file(output_csv_file_path, time_array, velocities,row_data = ['
 
 
 for index,file_info in enumerate(source_files):
-    [source_file, output_file,type] = file_info.values()
+    [source_file, output_file,type,max_vel ] = file_info.values()
     i_values = read_i_values_from_csv(source_file)
-    SF = max(i_values) / 8388608.0
+    SF = max_vel / 8388608.0
 
     # Ensure the length of i_values matches the length of time_array
     # If i_values has fewer elements, we will cycle through the list
